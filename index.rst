@@ -9,8 +9,10 @@ Welcome to MicroPython Development Documentation's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
+    intro.rst
+    directories.rst
 
 
 Indices and tables
