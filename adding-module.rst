@@ -189,18 +189,18 @@ python's ``__repr__``). Let's add them near the top of our file:
     } mymodule_hello_obj_t;
 
 
-    mp_obj_t mymodule_hello_make_new(const mp_obj_type_t \*type, size_t n_args,
-                                     size_t n_kw, const mp_obj_t \*args) {
+    mp_obj_t mymodule_hello_make_new(const mp_obj_type_t *type, size_t n_args,
+                                     size_t n_kw, const mp_obj_t *args) {
         mp_arg_check_num(n_args, n_kw, 1, 1, true);
-        pyb_spi_obj_t \*self = m_new_obj(mymodule_hello_obj_t);
+        pyb_spi_obj_t *self = m_new_obj(mymodule_hello_obj_t);
         self->base.type = &mymodule_hello_type;
         self->hello_number = mp_obj_get_int(args[0])
         return MP_OBJ_FROM_PTR(self);
     }
 
 
-    STATIC void pyb_spi_print(const mp_print_t \*print, mp_obj_t self_in, mp_print_kind_t kind) {
-        pyb_spi_obj_t \*self = MP_OBJ_TO_PTR(self_in);
+    STATIC void pyb_spi_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+        pyb_spi_obj_t *self = MP_OBJ_TO_PTR(self_in);
         mp_printf(print, "Hello(%u)", self->hello_number);
     }
 
@@ -222,7 +222,7 @@ is a pointer to the data struct:
 .. code-block:: c
 
     STATIC mp_obj_t mymodule_hello_increment(mp_obj_t self_in) {
-        pyb_spi_obj_t \*self = MP_OBJ_TO_PTR(self_in);
+        pyb_spi_obj_t *self = MP_OBJ_TO_PTR(self_in);
         self->hello_number += 1;
         return mp_const_none;
     }
