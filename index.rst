@@ -1,10 +1,5 @@
-.. MicroPython Development Documentation documentation master file, created by
-   sphinx-quickstart on Sat Jul 23 17:02:22 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to MicroPython Development Documentation's documentation!
-=================================================================
+Welcome to MicroPython Development Documentation
+************************************************
 
 Contents:
 
@@ -13,6 +8,7 @@ Contents:
 
     intro.rst
     directories.rst
+    adding-module.rst
 
 
 Indices and tables
