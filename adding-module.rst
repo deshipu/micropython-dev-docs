@@ -44,7 +44,8 @@ Now just create an empty ``mymodule.c`` file, and run the compilation to see
 that it is now included in the firmware.
 
 
-## Creating a Python Module
+Creating a Python Module
+========================
 
 We have our file, but it doesn't actually do anything. It's empty, and there
 is no new python module that we could import. Time to change that.
