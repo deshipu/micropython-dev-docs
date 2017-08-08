@@ -10,7 +10,10 @@ will need to extend the existing firmware with your own C code, and this
 article is going to show you how to do it, using the ESP8266 port as the
 example.
 
-Note: you can use any naming-scheme you like and do not have to name your variables or data-type in any specific way. 
+Note: you can use any naming-scheme you like and do not have to name your 
+variables or data-type in any specific way. If you plan on extending a 
+Micropython port and create pull requests, you should however use the same 
+naming scheme of micropython. See the ESP8266 port for examples.
 
 Adding Your Own Source File
 ===========================
@@ -62,16 +65,16 @@ structure. Open the ``mymodule.c`` file and put this code inside:
     #include "py/binary.h"
     #include "portmodules.h"
 
-
-    STATIC const mp_map_elem_t mymodule_globals_table[] = 
-    {
+    STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
     };
 
-    STATIC MP_DEFINE_CONST_DICT(mp_module_mymodule_globals, mymodule_globals_table);
+    STATIC MP_DEFINE_CONST_DICT ( 
+        mp_module_mymodule_globals, 
+        mymodule_globals_table
+    );
 
-    const mp_obj_module_t mp_module_mymodule = 
-    {
+    const mp_obj_module_t mp_module_mymodule = {
         .base = { &mp_type_module },
         .globals = (mp_obj_dict_t*)&mp_module_mymodule_globals,
     };
@@ -108,8 +111,7 @@ add this code right after the includes:
 
     #include <stdio.h>
 
-    STATIC mp_obj_t mymodule_hello(void) 
-    {
+    STATIC mp_obj_t mymodule_hello(void) {
         printf("Hello world!\n");
         return mp_const_none;
     }
@@ -118,22 +120,26 @@ add this code right after the includes:
 
 This creates a function object ``mymodule_hello_obj`` which takes no arguments,
 and when called, executes the C function ``mymodule_hello``. Also note, that
-our function has to return something (as evey function returns an mp_obj_t-struct) -- so we return ``None``. Now we need to
+our function has to return something (as every Python function returns an 
+mp_obj_t-struct) -- so we return ``None``. Now we need to
 actually add that function object to our module:
 
 .. code-block:: c
 
-    STATIC const mp_map_elem_t mymodule_globals_table[] = 
-    {
+    STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
         { MP_OBJ_NEW_QSTR(MP_QSTR_hello), (mp_obj_t)&mymodule_hello_obj },
     };
 
-Micropython uses the QSTR-macros to define constant strings. This is used to identify strings and store only unique ones for preserving memory (as it is very limited on the PyBoard-Hardware). Your port has a file ``qstrdefsport.h``. In our case add ``Q(hello)`` to the list (on a new line). This will define the string ``hello`` for Micropython. Failing to do so will result in a missing file on compilation. 
+Micropython uses the QSTR-macros to define constant strings. This is used to 
+identify strings and store only unique ones for preserving memory (as it is 
+very limited on the PyBoard-Hardware). Your port has a file ``qstrdefsport.h``. 
+In our case add ``Q(hello)`` to the list (on a new line). This will define the 
+string ``hello`` for Micropython. Failing to do so will result in a missing 
+file on compilation. 
 
 Now when you compile and flash the firmware, you will be able to import the
 module and call the function inside it.
-
 
 Function Arguments
 ==================
@@ -145,14 +151,15 @@ C function then needs to take an argument of type ``mp_obj_t``:
 
 .. code-block:: c
 
-    STATIC mp_obj_t mymodule_hello(mp_obj_t what) 
-    {
+    STATIC mp_obj_t mymodule_hello(mp_obj_t what) {
         printf("Hello %s!\n", mp_obj_str_get_str(what));
         return mp_const_none;
     }
     STATIC MP_DEFINE_CONST_FUN_OBJ_1(mymodule_hello_obj, mymodule_hello);
 
-This function will use the C-function ``printf`` to output a string. The parameter ``what`` will be turned into a string by the ``mp_obj_str_get_str``-function (i.e. by Micropython). If you want to do that yourself, https://github.com/micropython/micropython/blob/master/py/obj.h#L472 (py/obj.h Line 472).
+This function will use the C-function ``printf`` to output a string. The 
+parameter ``what`` will be turned into a string by the 
+``mp_obj_str_get_str``-function (i.e. by Micropython). 
 
 Note that the ``mp_obj_str_get_str`` function will automatically raise the
 right exception on the python side if the argument we gave it is not a python
@@ -172,16 +179,21 @@ A class is a C-struct with certain fields, quite similar to a module:
 
     // creating the table of global members
     STATIC const mp_rom_map_elem_t mymodule_hello_locals_dict_table[] = { };
-    STATIC MP_DEFINE_CONST_DICT(mymodule_hello_locals_dict, mymodule_hello_locals_dict_table);
+    STATIC MP_DEFINE_CONST_DICT(mymodule_hello_locals_dict, 
+                                mymodule_hello_locals_dict_table);
 
     // create the class-object itself
-    const mp_obj_type_t mymodule_helloObj_type = 
-    {
-        { &mp_type_type },                  // "inherit" the type "type"
-        .name = MP_QSTR_helloObj,           // give it a name
-        .print = mymodule_hello_print,      // give it a print-function
-        .make_new = mymodule_hello_make_new,    // give it a constructor
-        .locals_dict = (mp_obj_dict_t*)&mymodule_hello_locals_dict, // and the global members
+    const mp_obj_type_t mymodule_helloObj_type = {
+        // "inherit" the type "type"
+        { &mp_type_type },
+         // give it a name
+        .name = MP_QSTR_helloObj,
+         // give it a print-function
+        .print = mymodule_hello_print,
+         // give it a constructor
+        .make_new = mymodule_hello_make_new,
+         // and the global members
+        .locals_dict = (mp_obj_dict_t*)&mymodule_hello_locals_dict,
     };
 
 It needs two functions: one for creating the class and allocating all the
@@ -191,19 +203,23 @@ python's ``__repr__``). Let's add them near the top of our file:
 .. code-block:: c
     
     // this is the actual C-structure for our new object
-    typedef struct _mymodule_hello_obj_t 
-    {
-        mp_obj_base_t base;         // base represents some basic information, like type
-        uint8_t hello_number;       // a member created by us
+    typedef struct _mymodule_hello_obj_t {
+        // base represents some basic information, like type
+        mp_obj_base_t base;
+        // a member created by us
+        uint8_t hello_number;
     } mymodule_hello_obj_t;
 
 
-We define a C-struct which holds the class data and one additional field ``hello_number``. Next we need a function to print the object and a constructor:
+We define a C-struct, which holds the class data and one additional field 
+``hello_number``. Next we need a function to print the object and a constructor:
 
 .. code-block:: c
 
-    mp_obj_t mymodule_hello_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args)
-    {
+    mp_obj_t mymodule_hello_make_new( const mp_obj_type_t *type, 
+                                      size_t n_args, 
+                                      size_t n_kw, 
+                                      const mp_obj_t *args ) {
         // this checks the number of arguments (min 1, max 1);
         // on error -> raise python exception
         mp_arg_check_num(n_args, n_kw, 1, 1, true); 
@@ -217,26 +233,29 @@ We define a C-struct which holds the class data and one additional field ``hello
     }
 
 
-    STATIC void mymodule_hello_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) 
-    {
+    STATIC void mymodule_hello_print( const mp_print_t *print, 
+                                      mp_obj_t self_in, 
+                                      mp_print_kind_t kind ) {
         // get a ptr to the C-struct of the object
         mymodule_hello_obj_t *self = MP_OBJ_TO_PTR(self_in);
         // print the number
         printf ("Hello(%u)", self->hello_number);
     }
 
-Now we need to add our object to the module, by adding it into the global member dictionary of our module:
+Now we need to add our object to the module, by adding it into the global 
+member dictionary of our module:
 
 .. code-block:: c
 
-    STATIC const mp_map_elem_t mymodule_globals_table[] = 
-    {
+    STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
         { MP_OBJ_NEW_QSTR(MP_QSTR_hello), (mp_obj_t)&mymodule_hello_obj },
         { MP_OBJ_NEW_QSTR(MP_QSTR_helloObj), (mp_obj_t)&mymodule_helloObj_obj },
     };
 
-Note that both the function ``mymodule_hello_obj`` added earlier to our module and the class ``mymodule_hello_obj`` are passed as ``mp_obj_t`` to the globals-table of the module. 
+Note that both the function ``mymodule_hello_obj`` added earlier to our module 
+and the class ``mymodule_hello_obj`` are passed as ``mp_obj_t`` to the 
+globals table of the module. 
 
 Adding Methods
 ==============
@@ -247,28 +266,28 @@ is a pointer to the data struct:
 
 .. code-block:: c
 
-    STATIC mp_obj_t mymodule_hello_increment(mp_obj_t self_in) 
-    {
+    STATIC mp_obj_t mymodule_hello_increment(mp_obj_t self_in) {
         mymodule_hello_obj_t *self = MP_OBJ_TO_PTR(self_in);
         self->hello_number += 1;
         return mp_const_none;
     }
-    MP_DEFINE_CONST_FUN_OBJ_1(mymodule_hello_increment_obj, mymodule_hello_increment);
+    MP_DEFINE_CONST_FUN_OBJ_1(mymodule_hello_increment_obj, 
+                              mymodule_hello_increment);
 
 
 Also, don't forget to add them to the locals dict:
 
 .. code-block:: c
 
-    STATIC const mp_rom_map_elem_t mymodule_hello_locals_dict_table[] = 
-    {
+    STATIC const mp_rom_map_elem_t mymodule_hello_locals_dict_table[] = {
         { MP_ROM_QSTR(MP_QSTR_inc), MP_ROM_PTR(&mymodule_hello_increment_obj) },
     }
 
 Using our module in Micropython
 ===============================
 
-Now we can use the module in Micropython after rebuilding our port. For example you can write a Python snippet like this:
+Now we can use the module in Micropython after rebuilding our port. For example 
+you can write a Python snippet like this:
 
 .. code-block:: python
 
