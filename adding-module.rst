@@ -63,7 +63,7 @@ structure. Open the ``mymodule.c`` file and put this code inside:
     #include "py/obj.h"
     #include "py/runtime.h"
     #include "py/binary.h"
-    #include "portmodules.h"
+    #include "py/mpconfig.h"
 
     STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
@@ -226,9 +226,9 @@ We define a C-struct, which holds the class data and one additional field
         // create a new object of our C-struct type
         mymodule_hello_obj_t *self = m_new_obj(mymodule_hello_obj_t);
         // give it a type
-        self->base.type = &mymodule_hello_type;
+        self->base.type = &mymodule_helloObj_type;
         // set the member number with the first argument of the constructor
-        self->hello_number = mp_obj_get_int(args[0])
+        self->hello_number = mp_obj_get_int(args[0]);
         return MP_OBJ_FROM_PTR(self);
     }
 
@@ -250,7 +250,7 @@ member dictionary of our module:
     STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
         { MP_OBJ_NEW_QSTR(MP_QSTR_hello), (mp_obj_t)&mymodule_hello_obj },
-        { MP_OBJ_NEW_QSTR(MP_QSTR_helloObj), (mp_obj_t)&mymodule_helloObj_obj },
+        { MP_OBJ_NEW_QSTR(MP_QSTR_helloObj), (mp_obj_t)&mymodule_helloObj_type },
     };
 
 Note that both the function ``mymodule_hello_obj`` added earlier to our module 
