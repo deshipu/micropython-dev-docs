@@ -63,7 +63,7 @@ structure. Open the ``mymodule.c`` file and put this code inside:
     #include "py/obj.h"
     #include "py/runtime.h"
     #include "py/binary.h"
-    #include "portmodules.h"
+    #include "py/mpconfig.h"
 
     STATIC const mp_map_elem_t mymodule_globals_table[] = {
         { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_mymodule) },
